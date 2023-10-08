@@ -1,28 +1,28 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Timer from "../../components/Timer";
-import {
-  ArrowDownIcon,
-  QuestionIcon,
-  ArrowDownIcon2,
-  ArrowUpIcon,
-} from "../../assets/Icons";
+import { ArrowDownIcon, QuestionIcon, ArrowDownIcon2, ArrowUpIcon } from "../../assets/Icons";
 import moment from "moment";
 import Modal from "../../components/Modal";
 import ConnectWallet from "../../components/ConnectWallet";
-import { stake1_address,stake1_abi,token_abi,Stake1_token_Address } from "../../components/config";
-import { useContractReads,useContractRead ,useContractWrite, usePrepareContractWrite, useWaitForTransaction, usePublicClient } from 'wagmi'
+import { stake1_address, stake1_abi, token_abi, Stake1_token_Address } from "../../components/config";
+import { useContractReads, useContractRead, useContractWrite, usePrepareContractWrite, useWaitForTransaction, usePublicClient } from "wagmi";
 import ConfirmationPopup from "../../components/confirmationPopup";
-import {useNetwork,  useSwitchNetwork } from 'wagmi'
+import { useNetwork, useSwitchNetwork } from "wagmi";
 
-import { useAccount, useDisconnect } from 'wagmi'
-import { publicProvider } from 'wagmi/providers/public'
+import { useAccount, useDisconnect } from "wagmi";
+import { publicProvider } from "wagmi/providers/public";
 
 import Web3 from "web3";
-const stake2_Contract = {
+
+const poolContract = {
   address: stake1_address,
   abi: stake1_abi,
-}
+};
 
+const stakeToken1Contract = {
+  address: Stake1_token_Address,
+  abi: token_abi,
+};
 
 const FirstBox = ({
   headerTabsList,
@@ -48,24 +48,19 @@ const FirstBox = ({
   token4,
   setToken4,
   set_hideTime,
-  hideTime
+  hideTime,
 }) => {
-
-
   const APRList = [
-    { value: "0", lbl: "365 Days" ,APR: "550%" },
-    { value: "1", lbl: "120 Days"  ,APR: "230%" },
-    { value: "2", lbl: "90 Days"  ,APR: "180%" },
-    { value: "3", lbl: "60 Days"  ,APR: "130%" },
-    { value: "4", lbl: "30 Days" ,APR: "80%"  },
-    { value: "5", lbl: "7 Days"  ,APR: "30%" },
-
-
-
+    { value: "0", lbl: "365 Days", APR: "550%" },
+    { value: "1", lbl: "120 Days", APR: "230%" },
+    { value: "2", lbl: "90 Days", APR: "180%" },
+    { value: "3", lbl: "60 Days", APR: "130%" },
+    { value: "4", lbl: "30 Days", APR: "80%" },
+    { value: "5", lbl: "7 Days", APR: "30%" },
   ];
-  const [ selectedAPR,set_selectedAPR] = useState(APRList[0])
+  const [selectedAPR, set_selectedAPR] = useState(APRList[0]);
 
-  const { address, isConnecting ,isDisconnected} = useAccount()
+  const { address, isConnecting, isDisconnected } = useAccount();
   const [open, setOpen] = useState(false);
   const [openConnectWallet, setOpenConnectWallet] = useState(false);
 
@@ -87,35 +82,29 @@ const FirstBox = ({
 
   const [slected_plp_add, set_slected_plp_add] = useState("");
   const [curr_time, set_currTime] = useState(0);
-  const { chain } = useNetwork()
+  const { chain } = useNetwork();
 
-  let details=[];
-  let details_rew=[];
+  let details = [];
+  let details_rew = [];
 
-  let count=0;
-  const networkId=369;
+  let count = 0;
+  // const networkId=369;
+  const networkId = 943;
   // let count1=0;
 
-  useEffect(()=>{
+  useEffect(() => {
+    if (count == 0 && address != undefined) {
+      test();
+      count++;
+    }
+  }, address);
 
-    if(count==0&& address!=undefined)
-    {
-
-        test()
-        count++;
-
-
-}
-  },address)
-
-
-  const { config:appConfig } = usePrepareContractWrite({
-    address: token1[1],
+  const { config: appConfig } = usePrepareContractWrite({
+    address: Stake1_token_Address,
     abi: token_abi,
-    functionName: 'approve',
-    args: [stake1_address,stakeAmount*10**18],
-  })
-
+    functionName: "approve",
+    args: [stake1_address, stakeAmount * 10 ** 18],
+  });
 
   // const { config: stakeConfig } = usePrepareContractWrite({
   //   address: stake1_address,
@@ -126,233 +115,239 @@ const FirstBox = ({
 
   // })
 
-
-  
-    const { data:stakeResult, isLoading:isLoading_stake, isSuccess:stakeSuccess, write:staking } = useContractWrite({
-
-      address: stake1_address,
+  const {
+    data: stakeResult,
+    isLoading: isLoading_stake,
+    isSuccess: stakeSuccess,
+    write: staking,
+  } = useContractWrite({
+    address: stake1_address,
     abi: stake1_abi,
-    functionName: 'Stake',
-    args: [token1[1],stakeAmount*10**18,selectedAPR.value],
+    functionName: "Stake",
+    args: [token1[1], stakeAmount * 10 ** 18, selectedAPR.value],
     // value: Convert_To_Wei(((stakeAmount)*0.3/100)),
     onSuccess(data) {
       // test();
-      console.log('Success', data)
+      console.log("Success", data);
     },
-  
+  });
 
-  })
+  // const { write } = useContractWrite({
 
+  //   address: token1[1],
+  //   abi: token_abi,
+  //   functionName: 'approve',
+  //   args: [stake1_address,stakeAmount*10**18],
+  //   onMutate({ args, overrides }) {
+  //     staking?.()
+  //     console.log('Success', data)
+  //   },
 
+  // })
 
+  const { config: unstakeConfig } = usePrepareContractWrite({
+    address: stake1_address,
+    abi: stake1_abi,
+    functionName: "unStake",
+    args: [slected_pair_inv ? slected_pair_inv[3] : null, slected_plp_add],
+  });
 
+  const { config: claimRewardConfig } = usePrepareContractWrite({
+    address: stake1_address,
+    abi: stake1_abi,
+    functionName: "withdrawReward",
+  });
+  const { data: data_app, isLoading: isLoading_app, isSuccess: isSuccess_app, write: approval } = useContractWrite(appConfig);
 
-    // const { write } = useContractWrite({
-      
-    //   address: token1[1],
-    //   abi: token_abi,
-    //   functionName: 'approve',
-    //   args: [stake1_address,stakeAmount*10**18],
-    //   onMutate({ args, overrides }) {
-    //     staking?.()
-    //     console.log('Success', data)
-    //   },
-    
-    // })
+  // const { data:data__stake, isLoading:isLoading_stake, isSuccess:isSuccess_stake, write: staking  } = useContractWrite(stakeConfig)
 
+  const { data: data__unstake, isLoading: isLoading_unstake, isSuccess: isSuccess_unstake, write: unstake } = useContractWrite(unstakeConfig);
+  const { data: stakeResult_withdrawReward, isLoading2_withdrawReward, isSuccess2_withdrawReward, write: withdrawReward } = useContractWrite(claimRewardConfig);
 
-    
-    const { config:unstakeConfig } = usePrepareContractWrite({
-      address: stake1_address,
-      abi: stake1_abi,
-      functionName: 'unStake',
-      args: [slected_pair_inv?slected_pair_inv[3]:null,slected_plp_add],
+  const waitForTransaction = useWaitForTransaction({
+    hash: data_app?.hash,
+    onSuccess(data) {
+      staking?.();
+      console.log("Success", data);
+    },
+  });
 
-    })
+  const waitForTransaction2 = useWaitForTransaction({
+    hash: stakeResult?.hash,
+    onSuccess(data) {
+      test?.();
+      console.log("Success2", data);
+    },
+  });
 
+  const waitForTransaction3 = useWaitForTransaction({
+    hash: data__unstake?.hash,
+    onSuccess(data) {
+      test?.();
+      console.log("Success2", data);
+    },
+  });
 
-    const { config:claimRewardConfig } = usePrepareContractWrite({
-      address: stake1_address,
-      abi: stake1_abi,
-      functionName: 'withdrawReward',
-    
-    })
-    const {data:data_app, isLoading:isLoading_app, isSuccess:isSuccess_app,write: approval} = useContractWrite(appConfig)
-
-    // const { data:data__stake, isLoading:isLoading_stake, isSuccess:isSuccess_stake, write: staking  } = useContractWrite(stakeConfig)
-
-    const { data:data__unstake, isLoading:isLoading_unstake, isSuccess:isSuccess_unstake, write:unstake } = useContractWrite(unstakeConfig)
-    const { data:stakeResult_withdrawReward, isLoading2_withdrawReward, isSuccess2_withdrawReward, write:withdrawReward } = useContractWrite(claimRewardConfig)
-
-
-    const waitForTransaction = useWaitForTransaction({
-      hash: data_app?.hash,
-      onSuccess(data) {
-      staking?.()
-        console.log('Success',data )
-      },
-    })
-
-
-    const waitForTransaction2 = useWaitForTransaction({
-      hash: stakeResult?.hash,
-      onSuccess(data) {
-      test?.()
-        console.log('Success2',data )
-      },
-    })
-
-    const waitForTransaction3 = useWaitForTransaction({
-      hash: data__unstake?.hash,
-      onSuccess(data) {
-      test?.()
-        console.log('Success2',data )
-      },
-    })
-
-    const waitForTransaction4 = useWaitForTransaction({
-      hash: stakeResult_withdrawReward?.hash,
-      onSuccess(data) {
-      test?.()
-        console.log('Success2',data )
-      },
-    })
+  const waitForTransaction4 = useWaitForTransaction({
+    hash: stakeResult_withdrawReward?.hash,
+    onSuccess(data) {
+      test?.();
+      console.log("Success2", data);
+    },
+  });
 
   const { data, isError1, isLoading1 } = useContractReads({
     contracts: [
       {
-        ...stake2_Contract,
-        functionName: 'get_currTime',
+        ...poolContract,
+        functionName: "Apy",
+      },
+      {
+        ...poolContract,
+        functionName: "getTotalInvestment",
+      },
+      {
+        ...poolContract,
+        functionName: "get_currTime",
       },
 
-      
-      
-      
+      {
+        ...poolContract,
+        functionName: "owner",
+      },
+      {
+        ...poolContract,
+        functionName: "totalusers",
+      },
+      {
+        ...poolContract,
+        functionName: "totalbusiness",
+      },
+      {
+        ...poolContract,
+        functionName: "user",
+        args: [address],
+      },
+      {
+        ...poolContract,
+        functionName: "get_withdrawnTime",
+        args: [1],
+      },
 
+      {
+        ...stakeToken1Contract,
+        functionName: "balanceOf",
+        args: [address],
+      },
     ],
-  })
+  });
 
-  const {switchNetwork:stake_switch } =
-    useSwitchNetwork({
-      chainId: networkId,
-      // throwForSwitchChainNotSupported: true,
-      onSuccess(){
+  const { switchNetwork: stake_switch } = useSwitchNetwork({
+    chainId: networkId,
+    // throwForSwitchChainNotSupported: true,
+    onSuccess() {
+      approval?.();
+    },
+  });
+  const { switchNetwork: unstake_switch } = useSwitchNetwork({
+    chainId: networkId,
+    // throwForSwitchChainNotSupported: true,
+    onSuccess() {
+      unstake?.();
+    },
+  });
+  const {
+    chains,
+    error,
+    isLoading,
+    pendingChainId,
+    switchNetwork: reward_switch,
+  } = useSwitchNetwork({
+    chainId: networkId,
+    // throwForSwitchChainNotSupported: true,
+    onSuccess() {
+      withdrawReward?.();
+    },
+  });
 
-        approval?.()
-      }
-
-    })
-    const { switchNetwork:unstake_switch } =
-    useSwitchNetwork({
-      chainId: networkId,
-      // throwForSwitchChainNotSupported: true,
-      onSuccess(){
-
-        unstake?.()
-      }
-
-    })
-    const { chains, error, isLoading, pendingChainId, switchNetwork:reward_switch } =
-    useSwitchNetwork({
-      chainId: networkId,
-      // throwForSwitchChainNotSupported: true,
-      onSuccess(){
-
-        withdrawReward?.()
-      }
-
-    })
-
-
-  function Convert_To_eth( val){
-    
-    const web3= new Web3(new Web3.providers.HttpProvider("https://pulsechain.publicnode.com"));
-    val= web3.utils.fromWei(val.toString(),"ether");
+  function Convert_To_eth(val) {
+    const web3 = new Web3(new Web3.providers.HttpProvider("https://pulsechain.publicnode.com"));
+    val = web3.utils.fromWei(val.toString(), "ether");
     return val;
-  
   }
 
-  function Convert_To_Wei( val){
-    const web3= new Web3(new Web3.providers.HttpProvider("https://pulsechain.publicnode.com"));
-    val= web3.utils.toWei(val.toString(),"ether");
+  function Convert_To_Wei(val) {
+    const web3 = new Web3(new Web3.providers.HttpProvider("https://pulsechain.publicnode.com"));
+    val = web3.utils.toWei(val.toString(), "ether");
     return val;
-  
   }
-  async function test1(){
+  async function test1() {
     console.log("its pulse chain ");
 
-    const web3= new Web3(new Web3.providers.HttpProvider("https://pulsechain.publicnode.com"));
-  
-              
-   const balance =await  web3.eth.getBalance(address)
-   console.log("its pulse chain "+balance);
-  
+    const web3 = new Web3(new Web3.providers.HttpProvider("https://pulsechain.publicnode.com"));
+
+    const balance = await web3.eth.getBalance(address);
+    console.log("its pulse chain " + balance);
   }
 
-  function find_date( time){
-    const now = new Date(time*1000);
-    console.log("its tie time"+ now);
+  function find_date(time) {
+    const now = new Date(time * 1000);
+    console.log("its tie time" + now);
 
-    const t=moment(now, "YYYYMMDD").fromNow();
+    const t = moment(now, "YYYYMMDD").fromNow();
     return t;
   }
 
-
-  async function test(){
-
+  async function test() {
     // const web3= new Web3(new Web3.providers.HttpProvider("https://pulsechain.publicnode.com"));
     // test1();
-    const web3= new Web3(new Web3.providers.HttpProvider("https://pulsechain.publicnode.com"));
-  
-              
-  //  const balance =await  web3.eth.getBalance(address)
-    const contract=new web3.eth.Contract(stake1_abi,stake1_address);
-    let totalReward = await contract.methods.getReward().call({ from: address });       
-    let curr_time = await contract.methods.get_currTime().call();    
-    let allowed_tokens = await contract.methods.getAll_allowedTokens().call({from:address});    
+    // const web3 = new Web3(new Web3.providers.HttpProvider("https://pulsechain.publicnode.com"));
+    const web3 = new Web3(new Web3.providers.HttpProvider("https://pulsechain-testnet.publicnode.com"));
+
+    //  const balance =await  web3.eth.getBalance(address)
+    const contract = new web3.eth.Contract(stake1_abi, stake1_address);
+    let totalReward = await contract.methods.getReward().call({ from: address });
+    let curr_time = await contract.methods.get_currTime().call();
+    let allowed_tokens = await contract.methods.getAll_allowedTokens().call({ from: address });
     set_allowedTokens(allowed_tokens);
-    console.log("allowed_tokens "+allowed_tokens[1][1]);
-    for(let i=0;i < allowed_tokens.length;i++)
-    {
-       let temp  = await contract.methods.getAll_investments(allowed_tokens[i][1].toString()).call({from:address}); 
-       let temp_rew  = await contract.methods.getAll_investments_ForReward(allowed_tokens[i][1].toString()).call({from:address}); 
+    console.log("allowed_tokens " + allowed_tokens[1][1]);
+    for (let i = 0; i < allowed_tokens.length; i++) {
+      let temp = await contract.methods.getAll_investments(allowed_tokens[i][1].toString()).call({ from: address });
+      let temp_rew = await contract.methods.getAll_investments_ForReward(allowed_tokens[i][1].toString()).call({ from: address });
 
-        // unstakeDetails.push(temp);
-        details.push(temp? temp :[]);
-        details_rew.push(temp_rew? temp_rew :[]);
+      // unstakeDetails.push(temp);
+      details.push(temp ? temp : []);
+      details_rew.push(temp_rew ? temp_rew : []);
 
-        
-        console.log("token add "+i +" "+allowed_tokens[i][1]);
-        console.log("details  "+i +" " +temp);
-
+      console.log("token add " + i + " " + allowed_tokens[i][1]);
+      console.log("details  " + i + " " + temp);
     }
-    console.log("test unstake prrr "+ details);
+    console.log("test unstake prrr " + details);
 
-    set_unstakeDetails(details)
-    set_RewardDetails(details_rew)
-    set_slected_plp_add(allowed_tokens[0][1])
+    set_unstakeDetails(details);
+    set_RewardDetails(details_rew);
+    set_slected_plp_add(allowed_tokens[0][1]);
 
-    console.log("all alloweed tokens"+ allowed_tokens);
+    console.log("all alloweed tokens" + allowed_tokens);
 
-    set_slected_pair(details[0])
+    set_slected_pair(details[0]);
 
-    set_slected_pair_inv(details[0][0])
+    set_slected_pair_inv(details[0][0]);
 
-    set_slected_pair_rew(details_rew[0])
+    set_slected_pair_rew(details_rew[0]);
 
-    set_slected_pair_inv_rew(details_rew[0][0])
+    set_slected_pair_inv_rew(details_rew[0][0]);
 
-    setToken1(allowed_tokens[0])
-    setToken3(allowed_tokens[0])
+    setToken1(allowed_tokens[0]);
+    setToken3(allowed_tokens[0]);
 
-
-    let Total_withdraw = await contract.methods.total_withdrawReward(address).call();       
+    let Total_withdraw = await contract.methods.total_withdrawReward(address).call();
 
     set_currTime(curr_time);
 
     set_totalReward(totalReward);
     set_Total_withdraw(Total_withdraw);
-    // let Total_withdraw = await contract.methods.total_withdraw_reaward().call({ from: address });       
+    // let Total_withdraw = await contract.methods.total_withdraw_reaward().call({ from: address });
 
     // let allInvestments = await contract.methods.getAll_investments().call({from: address});
 
@@ -360,119 +355,82 @@ const FirstBox = ({
     // setSelectedAmount(allInvestments[0]);
     // set_totalReward(totalReward);
     // set_Total_withdraw(Total_withdraw);
+  }
 
+  function stake() {
+    console.log("choosed Token " + token1[1]);
 
-
-  } 
-
-    function stake()
-  {
-    console.log("choosed Token "+token1[1]);
-
-    console.log("object stake val "+selectedAPR.value);
-    if(isDisconnected)
-    {
+    console.log("object stake val " + selectedAPR.value);
+    if (isDisconnected) {
       alert("kindly connect your wallet ");
       return;
     }
-    if(stakeAmount==0 )
-    {
+    if (stakeAmount == 0) {
       alert("kindly write amount to stake ");
       return;
     }
-    let fee= (stakeAmount*0.3)/(100)
-    fee=fee*10**18;
+    let fee = (stakeAmount * 0.3) / 100;
+    fee = fee * 10 ** 18;
 
-    if(Number(token1[2]) < Number(fee))
-    {
+    if (Number(token1[2]) < Number(fee)) {
       alert("You dont have enough balance");
       return;
     }
-    if(chain.id!=networkId)
-    {
+    if (chain.id != networkId) {
       console.log("object chain");
       stake_switch?.();
-    }else{
+    } else {
       console.log("object chain111");
 
-      approval?.()
-
+      approval?.();
     }
-
-
-
-
   }
 
-
-
-  function unstaking()
-  {
+  function unstaking() {
     console.log("object");
-    if(isDisconnected)
-    {
+    if (isDisconnected) {
       alert("kindly connect your wallet ");
       return;
     }
-    if(slected_pair_inv==undefined)
-    {
-      return
+    if (slected_pair_inv == undefined) {
+      return;
     }
     // console.log("object unstake1 "+slected_plp_add);
-    if(chain.id!=networkId)
-    {
+    if (chain.id != networkId) {
       unstake_switch?.();
-    }else{
-      unstake?.()
-
+    } else {
+      unstake?.();
     }
 
     // console.log(data__unstake);
-    
-
   }
 
-  function ClaimReward()
-  {
-    if(isDisconnected)
-    {
+  function ClaimReward() {
+    if (isDisconnected) {
       alert("kindly connect your wallet ");
       return;
     }
-    if(totalReward==0 )
-    {
+    if (totalReward == 0) {
       alert("You dont have reward to withdraw");
       return;
     }
 
     console.log("object withdraw ");
 
-
-    if(chain.id!=networkId)
-    {
+    if (chain.id != networkId) {
       reward_switch?.();
-    }else{
-      withdrawReward?.()
-
+    } else {
+      withdrawReward?.();
     }
-    
-
   }
-
-
 
   const BodyBottom = () => {
     return (
       <div className="body-bottom flex flex-col w-full">
         <div className="expend-tab flex items-center justify-center">
-          <div
-            className="btn-expend flex items-center justify-center cursor-pointer"
-            onClick={(e) => setExpend(!expend)}
-          >
+          <div className="btn-expend flex items-center justify-center cursor-pointer" onClick={(e) => setExpend(!expend)}>
             <h1 className="e-tag mr-2">{expend ? "Hide" : "Detail"}</h1>
-            <div className="e-icon flex items-center justify-center">
-              {expend ? <ArrowUpIcon /> : <ArrowDownIcon2 />}
-            </div>
+            <div className="e-icon flex items-center justify-center">{expend ? <ArrowUpIcon /> : <ArrowDownIcon2 />}</div>
           </div>
         </div>
         <div className={`expend-detail flex flex-col ${expend ? "show" : ""}`}>
@@ -487,98 +445,80 @@ const FirstBox = ({
           <div className="detail-item flex items-center justify-between">
             <div className="lbl-side"></div>
             <div className="val-side">
-            <a
-                    href="https://v2-app.pulsex.com/swap?inputCurrency=0x2260fac5e5542a773aa44fbcfedf7c193bc2c599&outputCurrency=0x33e4d3163e66b46babc0faf8b30c6c36dd4ab9e9"
-                    target="_blank"
-                    className="sub-menu-item"
-                    style={{ color:"#2498A3" }}
-                  >
-                    Get PLUTUS/WBTC
-                  </a>
-              
-              </div>
+              <a
+                href="https://v2-app.pulsex.com/swap?inputCurrency=0x2260fac5e5542a773aa44fbcfedf7c193bc2c599&outputCurrency=0x33e4d3163e66b46babc0faf8b30c6c36dd4ab9e9"
+                target="_blank"
+                className="sub-menu-item"
+                style={{ color: "#2498A3" }}
+              >
+                Get PLUTUS/WBTC
+              </a>
+            </div>
           </div>
           <div className="detail-item flex items-center justify-between">
             <div className="lbl-side"></div>
             <div className="val-side">
-            <a
-                    href="https://app.pulsex.com/swap?inputCurrency=0x33e4d3163e66b46babc0faf8b30c6c36dd4ab9e9&outputCurrency=0x6B175474E89094C44Da98b954EedeAC495271d0F"
-                    target="_blank"
-                    className="sub-menu-item"
-                    style={{ color:"#2498A3" }}
-                  >
-                    Get PLUTUS/DAI
-                  </a>
-              
-              </div>
+              <a
+                href="https://app.pulsex.com/swap?inputCurrency=0x33e4d3163e66b46babc0faf8b30c6c36dd4ab9e9&outputCurrency=0x6B175474E89094C44Da98b954EedeAC495271d0F"
+                target="_blank"
+                className="sub-menu-item"
+                style={{ color: "#2498A3" }}
+              >
+                Get PLUTUS/DAI
+              </a>
+            </div>
           </div>
           <div className="detail-item flex items-center justify-between">
             <div className="lbl-side"></div>
             <div className="val-side">
-            <a
-                    href="https://app.pulsex.com/swap?inputCurrency=0x33e4d3163e66b46babc0faf8b30c6c36dd4ab9e9&outputCurrency=0xdAC17F958D2ee523a2206206994597C13D831ec7"
-                    target="_blank"
-                    className="sub-menu-item"
-                    style={{ color:"#2498A3" }}
-                  >
-                    Get PLUTUS/USDT
-                  </a>
-              
-              </div>
+              <a
+                href="https://app.pulsex.com/swap?inputCurrency=0x33e4d3163e66b46babc0faf8b30c6c36dd4ab9e9&outputCurrency=0xdAC17F958D2ee523a2206206994597C13D831ec7"
+                target="_blank"
+                className="sub-menu-item"
+                style={{ color: "#2498A3" }}
+              >
+                Get PLUTUS/USDT
+              </a>
+            </div>
           </div>
           <div className="detail-item flex items-center justify-between">
             <div className="lbl-side"></div>
             <div className="val-side">
-            <a
-                    href=" https://app.pulsex.com/swap?inputCurrency=0x33e4d3163e66b46babc0faf8b30c6c36dd4ab9e9&outputCurrency=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
-                    target="_blank"
-                    className="sub-menu-item"
-                    style={{ color:"#2498A3" }}
-                  >
-                    Get PLUTUS/USDC
-                  </a>
-              
-              </div>
+              <a
+                href=" https://app.pulsex.com/swap?inputCurrency=0x33e4d3163e66b46babc0faf8b30c6c36dd4ab9e9&outputCurrency=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+                target="_blank"
+                className="sub-menu-item"
+                style={{ color: "#2498A3" }}
+              >
+                Get PLUTUS/USDC
+              </a>
+            </div>
           </div>
 
           <div className="detail-item flex items-center justify-between">
             <div className="lbl-side"></div>
             <div className="val-side">
-            <a
-                    href={"https://scan.pulsechain.com/address/"+stake1_address}
-                    target="_blank"
-                    className="sub-menu-item"
-                    style={{ color:"#2498A3" }}
-                  >
-                    View Contract
-                  </a>
-              
-              
-              </div>
+              <a href={"https://scan.pulsechain.com/address/" + stake1_address} target="_blank" className="sub-menu-item" style={{ color: "#2498A3" }}>
+                View Contract
+              </a>
+            </div>
           </div>
         </div>
       </div>
     );
   };
   return (
-
-    
     <div className="grid-box flex flex-col">
-
       <div className="box-header flex items-center">
         {headerTabsList.map((item, index) => (
           <div
-            className={`header-item flex items-center justify-center ${
-              (selectedTab === item.title) & (boxNumb === 1) ? "active" : ""
-            }`}
+            className={`header-item flex items-center justify-center ${(selectedTab === item.title) & (boxNumb === 1) ? "active" : ""}`}
             onClick={(e) => {
               setSelectedTab(item.title);
               setBoxNumb(1);
             }}
           >
-            <h1 className="item-tag flex items-center justify-center">
-              {item.title}
-            </h1>
+            <h1 className="item-tag flex items-center justify-center">{item.title}</h1>
           </div>
         ))}
       </div>
@@ -598,26 +538,21 @@ const FirstBox = ({
           <div className="body-meta flex flex-col justify-between h-full">
             <div className="flex flex-col">
               <div className="info-list flex flex-col">
-
                 <div className="info-item flex items-center justify-between">
                   <h1 className="item-lbl text-white">APR:</h1>
                   <h1 className="item-lbl text-white">{selectedAPR.APR}</h1>
                 </div>
                 <div className="info-item flex items-center justify-between">
-                  <h1 className="item-lbl text-white">
-                  3% Platform Fee:
-                  </h1>
-                  <h1 className="item-lbl text-white">{stakeAmount*3/100}</h1>
+                  <h1 className="item-lbl text-white">3% Platform Fee:</h1>
+                  <h1 className="item-lbl text-white">{(stakeAmount * 3) / 100}</h1>
                 </div>
                 <div className="info-item flex items-center justify-between">
-                  <h1 className="item-lbl text-white">
-                  Net Staked:
-                  </h1>
-                  <h1 className="item-lbl text-white">{stakeAmount-(stakeAmount*3/100)}</h1>
+                  <h1 className="item-lbl text-white">Net Staked:</h1>
+                  <h1 className="item-lbl text-white">{stakeAmount - (stakeAmount * 3) / 100}</h1>
                 </div>
               </div>
               <div className="input-form flex flex-col">
-              <div className="input-field flex flex-col">
+                <div className="input-field flex flex-col">
                   <div className="field-hdr flex items-center justify-between">
                     <h1 className="f-tag">Choose PLP Pair:</h1>
                   </div>
@@ -629,7 +564,6 @@ const FirstBox = ({
                           e.stopPropagation();
                           setHide1(!hide1);
                           set_hideTime(false);
-
                         }}
                       >
                         <div className="slt flex items-center">
@@ -640,10 +574,7 @@ const FirstBox = ({
                             />
                           </div> */}
                           <div className="unit-name flex aic font s14 b4">
-                            <span
-                              className="unit-eng flex aic font s14 b4"
-                              placeholder="Plano"
-                            >
+                            <span className="unit-eng flex aic font s14 b4" placeholder="Plano">
                               {token1 ? token1[0] : ""}
                             </span>
                           </div>
@@ -654,9 +585,7 @@ const FirstBox = ({
                         </div>
                       </div>
                     </div>
-                    <div
-                      className={`block flex aic abs ${hide1 ? "show" : ""}`}
-                    >
+                    <div className={`block flex aic abs ${hide1 ? "show" : ""}`}>
                       <div className="manue flex aic col anim">
                         {allowedTokens.map((item, index) => (
                           <div
@@ -665,21 +594,18 @@ const FirstBox = ({
                             onClick={(e) => {
                               setHide1(!hide1);
                               setToken1(item);
-                              console.log("choosed token "+token1[1]);
-
+                              console.log("choosed token " + token1[1]);
                             }}
                           >
                             <div className="unit-name flex aic font s14 b4">
-                              <span className="unit-eng flex aic font s14 b4">
-                                {item[0]}
-                              </span>
+                              <span className="unit-eng flex aic font s14 b4">{item[0]}</span>
                             </div>
                           </div>
                         ))}
                       </div>
                     </div>
                   </div>
-                </div> 
+                </div>
                 <div className="input-field flex flex-col">
                   <div className="field-hdr flex items-center justify-between">
                     <h1 className="f-tag">Choose Lock Period:</h1>
@@ -701,10 +627,7 @@ const FirstBox = ({
                             />
                           </div> */}
                           <div className="unit-name flex aic font s14 b4">
-                            <span
-                              className="unit-eng flex aic font s14 b4"
-                              placeholder="Plano"
-                            >
+                            <span className="unit-eng flex aic font s14 b4" placeholder="Plano">
                               {selectedAPR ? selectedAPR.lbl : ""}
                             </span>
                           </div>
@@ -715,9 +638,7 @@ const FirstBox = ({
                         </div>
                       </div>
                     </div>
-                    <div
-                      className={`block flex aic abs ${hideTime ? "show" : ""}`}
-                    >
+                    <div className={`block flex aic abs ${hideTime ? "show" : ""}`}>
                       <div className="manue flex aic col anim">
                         {APRList.map((item, index) => (
                           <div
@@ -726,25 +647,23 @@ const FirstBox = ({
                             onClick={(e) => {
                               set_hideTime(!hideTime);
                               // setToken1(item);
-                              set_selectedAPR(item)
+                              set_selectedAPR(item);
                             }}
                           >
                             <div className="unit-name flex aic font s14 b4">
-                              <span className="unit-eng flex aic font s14 b4">
-                                {item.lbl}
-                              </span>
+                              <span className="unit-eng flex aic font s14 b4">{item.lbl}</span>
                             </div>
                           </div>
                         ))}
                       </div>
                     </div>
                   </div>
-                </div> 
+                </div>
                 <div className="input-field flex flex-col">
                   <div className="field-hdr flex items-center justify-between">
                     <h1 className="f-tag">Select Amount:</h1>
                     <h1 className="f-tag">
-                      Balance: <span className="font-semibold">{token1?Number(token1[2])/10**18:0}</span>
+                      Balance: <span className="font-semibold">{data ? (Number(data[8].result) / 10 ** 18).toFixed(2) : 0} PLUTUS</span>
                     </h1>
                   </div>
                   <div className="field-i-box flex items-center">
@@ -754,27 +673,27 @@ const FirstBox = ({
                       placeholder="Amount"
                       min={0}
                       value={stakeAmount}
-                      max={token1?Number(token1[2])/10**18:0}
-                      onChange={(e)=>setStakedAmount(e.target.value)}
+                      max={token1 ? Number(token1[2]) / 10 ** 18 : 0}
+                      onChange={(e) => setStakedAmount(e.target.value)}
                     />
                     <div className="ib-right flex items-center">
                       <h1 className="ib-txt">PLP</h1>
-                      <button className="ib-btn button"onClick={(e)=>setStakedAmount((Number(token1[2])/10**18))}>Max</button>
+                      <button className="ib-btn button" onClick={(e) => setStakedAmount(Number(token1[2]) / 10 ** 18)}>
+                        Max
+                      </button>
                     </div>
                   </div>
                 </div>
-
               </div>
             </div>
             {
-                <button disabled={isLoading_app || isLoading_stake } className="btn-stack button" onClick={stake}> 
-                 {!isLoading_stake  && !isLoading_app &&! isSuccess_app && !stakeSuccess &&<div>Approve</div>}
-                  {isLoading_app && <div>Approving</div>}
-                  {!stakeSuccess && !isLoading_stake && isSuccess_app && <div>Approved</div>}
-                  {isLoading_stake && <div>Staking</div>}
-                  {!isLoading_app && stakeSuccess && <div>Approve</div>}
-                  </button>
-               
+              <button disabled={isLoading_app || isLoading_stake} className="btn-stack button" onClick={stake}>
+                {!isLoading_stake && !isLoading_app && !isSuccess_app && !stakeSuccess && <div>Approve</div>}
+                {isLoading_app && <div>Approving</div>}
+                {!stakeSuccess && !isLoading_stake && isSuccess_app && <div>Approved</div>}
+                {isLoading_stake && <div>Staking</div>}
+                {!isLoading_app && stakeSuccess && <div>Approve</div>}
+              </button>
             }
           </div>
           <BodyBottom />
@@ -789,7 +708,7 @@ const FirstBox = ({
         >
           {boxNumb !== 1 && <div className="overlay" />}
           <div className="body-top flex items-center justify-between">
-          <img src="/images/PRC20s.png" className="img1" />
+            <img src="/images/PRC20s.png" className="img1" />
             <h1 className="top-tag">PLUTUS/PRC20</h1>
           </div>
           <div className="body-meta flex flex-col justify-between h-full">
@@ -822,10 +741,7 @@ const FirstBox = ({
                             />
                           </div> */}
                           <div className="unit-name flex aic font s14 b4">
-                            <span
-                              className="unit-eng flex aic font s14 b4"
-                              placeholder="Plano"
-                            >
+                            <span className="unit-eng flex aic font s14 b4" placeholder="Plano">
                               {token1 ? token1[0] : ""}
                             </span>
                           </div>
@@ -836,9 +752,7 @@ const FirstBox = ({
                         </div>
                       </div>
                     </div>
-                    <div
-                      className={`block flex aic abs ${hide1 ? "show" : ""}`}
-                    >
+                    <div className={`block flex aic abs ${hide1 ? "show" : ""}`}>
                       <div className="manue flex aic col anim">
                         {allowedTokens.map((item, index) => (
                           <div
@@ -847,21 +761,16 @@ const FirstBox = ({
                             onClick={(e) => {
                               setHide1(!hide1);
                               setToken1(item);
-                              
-                              set_slected_pair(unstakeDetails[index])
-                              set_slected_plp_add(item[1])
-                              set_slected_pair_inv(unstakeDetails[index][0])
 
-                              console.log(" todfken index "+ unstakeDetails[index]);
+                              set_slected_pair(unstakeDetails[index]);
+                              set_slected_plp_add(item[1]);
+                              set_slected_pair_inv(unstakeDetails[index][0]);
 
-                              console.log(" token index"+ unstakeDetails[2][0]);
-
+                              console.log("unstakeDetails", unstakeDetails);
                             }}
                           >
                             <div className="unit-name flex aic font s14 b4">
-                              <span className="unit-eng flex aic font s14 b4">
-                                {item[0]}
-                              </span>
+                              <span className="unit-eng flex aic font s14 b4">{item[0]}</span>
                             </div>
                           </div>
                         ))}
@@ -870,7 +779,6 @@ const FirstBox = ({
                   </div>
                 </div>
 
-                
                 <div className="input-field flex flex-col">
                   <div className="field-hdr flex items-center justify-between">
                     <h1 className="f-tag">Current Investment:</h1>
@@ -882,16 +790,12 @@ const FirstBox = ({
                         onClick={(e) => {
                           e.stopPropagation();
                           setHide2(!hide2);
-
                         }}
                       >
                         <div className="slt flex items-center">
                           <div className="unit-name flex items-center font s14 b4">
-                            <span
-                              className="unit-eng flex items-center font s14 b4"
-                              placeholder="Plano"
-                            >
-                              {slected_pair_inv ? slected_pair_inv[0]/10**18 : ""}
+                            <span className="unit-eng flex items-center font s14 b4" placeholder="Plano">
+                              {slected_pair_inv ? slected_pair_inv[0] / 10 ** 18 : ""}
                             </span>
                           </div>
                         </div>
@@ -901,9 +805,7 @@ const FirstBox = ({
                         </div>
                       </div>
                     </div>
-                    <div
-                      className={`block flex aic abs ${hide2 ? "show" : ""}`}
-                    >
+                    <div className={`block flex aic abs ${hide2 ? "show" : ""}`}>
                       <div className="manue flex aic col anim">
                         {slected_pair.map((item, index) => (
                           <div
@@ -912,48 +814,38 @@ const FirstBox = ({
                             onClick={(e) => {
                               setHide2(!hide2);
                               // setToken2(item);
-                              set_slected_pair_inv(item)
-                              set_choosed_Unstake_inv(item[3])
-
+                              set_slected_pair_inv(item);
+                              set_choosed_Unstake_inv(item[3]);
                             }}
                           >
                             <div className="unit-name flex aic font w-full s14 b4 justify-between">
-                              <span className="unit-eng flex aic font s14 b4">
-                                {Number(item[0]) / 10 ** 18}
-                              </span>
-                              <span className="unit-eng flex aic font s14 b4" >
-                              {find_date(Number(item[2]))}
-                              </span>
+                              <span className="unit-eng flex aic font s14 b4">{parseFloat(item[0] / 10 ** 18)}</span>
+                              <span className="unit-eng flex aic font s14 b4">{find_date(Number(item[2]))}</span>
                             </div>
                           </div>
                         ))}
                       </div>
                     </div>
                   </div>
-                  <Timer  time={slected_pair_inv ? Number(slected_pair_inv[1]): 0}/>
+                  <Timer time={slected_pair_inv ? Number(slected_pair_inv[1]) : 0} />
                 </div>
               </div>
             </div>
-            {
-              slected_pair_inv?(
-                <button className="btn-stack button" disabled={isLoading_unstake} onClick={(e) =>{slected_pair_inv && Number(curr_time)<Number(slected_pair_inv[1])?(setOpen(true)):unstaking()} }>
-                  {!isLoading_unstake  && !isSuccess_unstake &&<div>Unstake</div>}
-                  {isLoading_unstake && !isSuccess_unstake && <div>Loading...</div>}
-                  {!isLoading_unstake && isSuccess_unstake && <div>Unstake</div>}
-
+            {slected_pair_inv ? (
+              <button
+                className="btn-stack button"
+                disabled={isLoading_unstake}
+                onClick={(e) => {
+                  slected_pair_inv && Number(curr_time) < Number(slected_pair_inv[1]) ? setOpen(true) : unstaking();
+                }}
+              >
+                {!isLoading_unstake && !isSuccess_unstake && <div>Unstake</div>}
+                {isLoading_unstake && !isSuccess_unstake && <div>Loading...</div>}
+                {!isLoading_unstake && isSuccess_unstake && <div>Unstake</div>}
               </button>
-
-
-
-
-              ):(
-                <button className="btn-stack button">
-                Unstake
-              </button>
-              )
-
-            }
-
+            ) : (
+              <button className="btn-stack button">Unstake</button>
+            )}
           </div>
           <BodyBottom />
         </div>
@@ -967,7 +859,7 @@ const FirstBox = ({
         >
           {boxNumb !== 1 && <div className="overlay" />}
           <div className="body-top flex items-center justify-between">
-          <img src="/images/PRC20s.png" className="img1" />
+            <img src="/images/PRC20s.png" className="img1" />
             <h1 className="top-tag">PLUTUS/PRC20</h1>
           </div>
           <div className="body-meta flex flex-col justify-between h-full">
@@ -975,11 +867,11 @@ const FirstBox = ({
               <div className="info-list flex flex-col">
                 <div className="info-item flex items-center justify-between">
                   <h1 className="item-lbl text-white">Total Earnings</h1>
-                  <h1 className="item-lbl text-white">{((Number(Total_withdraw)+Number(totalReward))/10**18)}</h1>
+                  <h1 className="item-lbl text-white">{(Number(Total_withdraw) + Number(totalReward)) / 10 ** 18}</h1>
                 </div>
                 <div className="info-item flex items-center justify-between">
-                <h1 className="item-lbl text-white">Available to Claim:</h1>
-                  <h1 className="item-lbl text-white">{(Number(totalReward)/10**18)}</h1>
+                  <h1 className="item-lbl text-white">Available to Claim:</h1>
+                  <h1 className="item-lbl text-white">{Number(totalReward) / 10 ** 18}</h1>
                 </div>
               </div>
               <div className="input-form flex flex-col">
@@ -1004,10 +896,7 @@ const FirstBox = ({
                             />
                           </div> */}
                           <div className="unit-name flex aic font s14 b4">
-                            <span
-                              className="unit-eng flex aic font s14 b4"
-                              placeholder="Plano"
-                            >
+                            <span className="unit-eng flex aic font s14 b4" placeholder="Plano">
                               {token3 ? token3[0] : ""}
                             </span>
                           </div>
@@ -1018,9 +907,7 @@ const FirstBox = ({
                         </div>
                       </div>
                     </div>
-                    <div
-                      className={`block flex aic abs ${hide3 ? "show" : ""}`}
-                    >
+                    <div className={`block flex aic abs ${hide3 ? "show" : ""}`}>
                       <div className="manue flex aic col anim">
                         {allowedTokens.map((item, index) => (
                           <div
@@ -1030,14 +917,12 @@ const FirstBox = ({
                               setHide3(!hide3);
                               setToken3(item);
 
-                              set_slected_pair_rew(RewardDetails[index])
-                              set_slected_pair_inv_rew(RewardDetails[index][0])
+                              set_slected_pair_rew(RewardDetails[index]);
+                              set_slected_pair_inv_rew(RewardDetails[index][0]);
                             }}
                           >
                             <div className="unit-name flex aic font s14 b4">
-                              <span className="unit-eng flex aic font s14 b4">
-                                {item[0]}
-                              </span>
+                              <span className="unit-eng flex aic font s14 b4">{item[0]}</span>
                             </div>
                           </div>
                         ))}
@@ -1060,11 +945,8 @@ const FirstBox = ({
                       >
                         <div className="slt flex items-center">
                           <div className="unit-name flex items-center font s14 b4">
-                            <span
-                              className="unit-eng flex items-center font s14 b4"
-                              placeholder="Plano"
-                            >
-                              {slected_pair_inv_rew ? slected_pair_inv_rew[0]/10**18 : ""}
+                            <span className="unit-eng flex items-center font s14 b4" placeholder="Plano">
+                              {slected_pair_inv_rew ? slected_pair_inv_rew[0] / 10 ** 18 : ""}
                             </span>
                           </div>
                         </div>
@@ -1074,9 +956,7 @@ const FirstBox = ({
                         </div>
                       </div>
                     </div>
-                    <div
-                      className={`block flex aic abs ${hide4 ? "show" : ""}`}
-                    >
+                    <div className={`block flex aic abs ${hide4 ? "show" : ""}`}>
                       <div className="manue flex aic col anim">
                         {slected_pair_rew.map((item, index) => (
                           <div
@@ -1085,18 +965,12 @@ const FirstBox = ({
                             onClick={(e) => {
                               setHide4(!hide4);
                               setToken4(item);
-                              set_slected_pair_inv_rew(item)
-
-
+                              set_slected_pair_inv_rew(item);
                             }}
                           >
                             <div className="unit-name flex aic font w-full s14 b4 justify-between">
-                              <span className="unit-eng flex aic font s14 b4">
-                                {Number(item[0]) / 10 ** 18}
-                              </span>
-                              <span className="unit-eng flex aic font s14 b4" >
-                              {find_date(Number(item[2]))}
-                              </span>
+                              <span className="unit-eng flex aic font s14 b4">{Number(item[0]) / 10 ** 18}</span>
+                              <span className="unit-eng flex aic font s14 b4">{find_date(Number(item[2]))}</span>
                             </div>
                           </div>
                         ))}
@@ -1105,7 +979,7 @@ const FirstBox = ({
                   </div>
                   <div className="field-hdr flex items-center justify-end">
                     <h1 className="f-tag">
-                    Earned : <span className="c-theme">{slected_pair_inv_rew?(slected_pair_inv_rew[6]/10**18):0}</span>
+                      Earned : <span className="c-theme">{slected_pair_inv_rew ? slected_pair_inv_rew[6] / 10 ** 18 : 0}</span>
                     </h1>
                   </div>
                 </div>
@@ -1127,19 +1001,19 @@ const FirstBox = ({
               </div>
             </div>
             <button className="btn-stack button" onClick={ClaimReward}>
-            {!isLoading2_withdrawReward  && !isSuccess2_withdrawReward &&<div>Claim</div>}
-                  {isLoading2_withdrawReward && !isSuccess2_withdrawReward && <div>Loading...</div>}
-                  {!isLoading2_withdrawReward && isSuccess2_withdrawReward && <div>Claim</div>}
+              {!isLoading2_withdrawReward && !isSuccess2_withdrawReward && <div>Claim</div>}
+              {isLoading2_withdrawReward && !isSuccess2_withdrawReward && <div>Loading...</div>}
+              {!isLoading2_withdrawReward && isSuccess2_withdrawReward && <div>Claim</div>}
             </button>
           </div>
           <BodyBottom />
         </div>
       ) : null}
-                    <Modal open={open} onClose={() => setOpen(false)}>
-          <ConfirmationPopup setOpen={setOpen} unstaking={unstaking}/>
-        </Modal>
+      <Modal open={open} onClose={() => setOpen(false)}>
+        <ConfirmationPopup setOpen={setOpen} unstaking={unstaking} />
+      </Modal>
 
-        {/* <Modal
+      {/* <Modal
         open={openConnectWallet}
         onClose={() => setOpenConnectWallet(false)}
       >

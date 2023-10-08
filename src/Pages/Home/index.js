@@ -23,13 +23,7 @@ import Wrapper from "../../routes/Wrapper";
 import ConfirmationPopup from "../../components/confirmationPopup";
 import { QuestionIcon, ArrowDownIcon } from "../../assets/Icons";
 
-import {
-  stake1_address,
-  stake2_address,
-  stake3_address,
-  stake1_abi,
-  stake2_3_abi,
-} from "../../components/config";
+import { stake1_address, stake2_address, stake3_address, stake1_abi, stake2_3_abi } from "../../components/config";
 const stake1_Contract = {
   address: stake1_address,
   abi: stake1_abi,
@@ -51,12 +45,8 @@ const Main = () => {
   const [selectedTab4, setSelectedTab4] = useState("Stake");
   const [selectedTab5, setSelectedTab5] = useState("Stake");
   const [selectedTab6, setSelectedTab6] = useState("Stake");
-  
-  const headerTabsList = [
-    { title: "Stake" },
-    { title: "Unstake" },
-    { title: "Reward" },
-  ];
+
+  const headerTabsList = [{ title: "Stake" }, { title: "Unstake" }, { title: "Reward" }];
   const [hideTime, set_hideTime] = useState(false);
   const [hide1, setHide1] = useState(false);
   const [hide2, setHide2] = useState(false);
@@ -138,7 +128,6 @@ const Main = () => {
           <div className="page-grid">
             {/* First Box */}
             <FirstBox
-            
               set_hideTime={set_hideTime}
               hideTime={hideTime}
               headerTabsList={headerTabsList}
@@ -165,7 +154,7 @@ const Main = () => {
               setToken4={setToken4}
             />
             {/* Second Box */}
-            <SecondBox
+            {/* <SecondBox
               headerTabsList={headerTabsList}
               selectedTab2={selectedTab2}
               setSelectedTab2={setSelectedTab2}
@@ -180,9 +169,9 @@ const Main = () => {
               setToken5={setToken5}
               token6={token6}
               setToken6={setToken6}
-            />
+            /> */}
             {/* Third Box */}
-            <ThirdBox
+            {/* <ThirdBox
               headerTabsList={headerTabsList}
               selectedTab3={selectedTab3}
               setSelectedTab3={setSelectedTab3}
@@ -197,19 +186,14 @@ const Main = () => {
               setToken7={setToken7}
               token8={token8}
               setToken8={setToken8}
-            />
+            /> */}
           </div>
           <div className="page-slider">
-            <Swiper
-              pagination={true}
-              modules={[Pagination]}
-              className="mySwiper"
-            >
+            <Swiper pagination={true} modules={[Pagination]} className="mySwiper">
               <SwiperSlide>
                 <FirstBox
-                              set_hideTime={set_hideTime}
-                              hideTime={hideTime}
-
+                  set_hideTime={set_hideTime}
+                  hideTime={hideTime}
                   headerTabsList={headerTabsList}
                   selectedTab={selectedTab}
                   setSelectedTab={setSelectedTab}
@@ -235,7 +219,7 @@ const Main = () => {
                 />
               </SwiperSlide>
               <SwiperSlide>
-                <SecondBox
+                {/* <SecondBox
                   headerTabsList={headerTabsList}
                   selectedTab2={selectedTab2}
                   setSelectedTab2={setSelectedTab2}
@@ -250,10 +234,10 @@ const Main = () => {
                   setToken5={setToken5}
                   token6={token6}
                   setToken6={setToken6}
-                />
+                /> */}
               </SwiperSlide>
               <SwiperSlide>
-                <ThirdBox
+                {/* <ThirdBox
                   headerTabsList={headerTabsList}
                   selectedTab3={selectedTab3}
                   setSelectedTab3={setSelectedTab3}
@@ -268,7 +252,7 @@ const Main = () => {
                   setToken7={setToken7}
                   token8={token8}
                   setToken8={setToken8}
-                />
+                /> */}
               </SwiperSlide>
             </Swiper>
           </div>
@@ -282,7 +266,7 @@ const Main = () => {
           </div>
           <div className="page-grid">
             {/* Fourth Box */}
-            <FourthBox
+            {/* <FourthBox
               headerTabsList={headerTabsList}
               selectedTab3={selectedTab4}
               setSelectedTab3={setSelectedTab4}
@@ -297,9 +281,9 @@ const Main = () => {
               setToken7={setToken9}
               token8={token10}
               setToken8={setToken10}
-            />
+            /> */}
             {/* Fifth Box */}
-            <FifthBox
+            {/* <FifthBox
               headerTabsList={headerTabsList}
               selectedTab3={selectedTab5}
               setSelectedTab3={setSelectedTab5}
@@ -314,10 +298,10 @@ const Main = () => {
               setToken7={setToken11}
               token8={token12}
               setToken8={setToken12}
-            />
+            /> */}
 
             {/* Sixth Box */}
-            <SixBox
+            {/* <SixBox
               headerTabsList={headerTabsList}
               selectedTab3={selectedTab6}
               setSelectedTab3={setSelectedTab6}
@@ -332,16 +316,12 @@ const Main = () => {
               setToken7={setToken13}
               token8={token14}
               setToken8={setToken14}
-            />
+            /> */}
           </div>
           <div className="page-slider">
-            <Swiper
-              pagination={true}
-              modules={[Pagination]}
-              className="mySwiper"
-            >
+            <Swiper pagination={true} modules={[Pagination]} className="mySwiper">
               <SwiperSlide>
-                <FourthBox
+                {/* <FourthBox
                   headerTabsList={headerTabsList}
                   selectedTab3={selectedTab4}
                   setSelectedTab3={setSelectedTab4}
@@ -356,10 +336,10 @@ const Main = () => {
                   setToken7={setToken9}
                   token8={token10}
                   setToken8={setToken10}
-                />
+                /> */}
               </SwiperSlide>
               <SwiperSlide>
-                <FifthBox
+                {/* <FifthBox
                   headerTabsList={headerTabsList}
                   selectedTab3={selectedTab5}
                   setSelectedTab3={setSelectedTab5}
@@ -374,10 +354,10 @@ const Main = () => {
                   setToken7={setToken11}
                   token8={token12}
                   setToken8={setToken12}
-                />
+                /> */}
               </SwiperSlide>
               <SwiperSlide>
-                <SixBox
+                {/* <SixBox
                   headerTabsList={headerTabsList}
                   selectedTab3={selectedTab6}
                   setSelectedTab3={setSelectedTab6}
@@ -392,7 +372,7 @@ const Main = () => {
                   setToken7={setToken13}
                   token8={token14}
                   setToken8={setToken14}
-                />
+                /> */}
               </SwiperSlide>
             </Swiper>
           </div>

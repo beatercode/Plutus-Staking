@@ -2,12 +2,7 @@ import React, { useState, useEffect } from "react";
 import Timer from "../../components/Timer";
 import Modal from "../../components/Modal";
 
-import {
-  ArrowDownIcon,
-  QuestionIcon,
-  ArrowDownIcon2,
-  ArrowUpIcon,
-} from "../../assets/Icons";
+import { ArrowDownIcon, QuestionIcon, ArrowDownIcon2, ArrowUpIcon } from "../../assets/Icons";
 
 import { useNetwork, useSwitchNetwork } from "wagmi";
 import moment from "moment";
@@ -15,19 +10,8 @@ import moment from "moment";
 import ConfirmationPopup from "../../components/confirmationPopup";
 import Web3 from "web3";
 import { useAccount, useDisconnect } from "wagmi";
-import {
-  stake5_address,
-  stake2_3_abi,
-  token_abi,
-  Stake5_token_Address,
-} from "../../components/config";
-import {
-  useContractReads,
-  useContractRead,
-  useContractWrite,
-  usePrepareContractWrite,
-  useWaitForTransaction,
-} from "wagmi";
+import { stake5_address, stake2_3_abi, token_abi, Stake5_token_Address } from "../../components/config";
+import { useContractReads, useContractRead, useContractWrite, usePrepareContractWrite, useWaitForTransaction } from "wagmi";
 
 const stake3_Contract = {
   address: stake5_address,
@@ -73,12 +57,9 @@ const ThirdBox = ({
 
   const [stakeAmount, setStakedAmount] = useState(0);
   const [curr_time, set_currTime] = useState(0);
-  const [selectedAmount_forReward, setSelectedAmount_forReward] =
-    useState(null);
+  const [selectedAmount_forReward, setSelectedAmount_forReward] = useState(null);
 
-  const [All_investments_ForReward, set_All_investments_ForReward] = useState(
-    []
-  );
+  const [All_investments_ForReward, set_All_investments_ForReward] = useState([]);
   const [choosed_Unstake_inv, set_choosed_Unstake_inv] = useState();
   const [allInvestments, set_investmentList] = useState([]);
   const [selectedAmount, setSelectedAmount] = useState(null);
@@ -125,26 +106,11 @@ const ThirdBox = ({
     functionName: "withdrawReward",
   });
 
-  const {
-    data: data_app,
-    isLoading: isLoading_app,
-    isSuccess: isSuccess_app,
-    write: approval,
-  } = useContractWrite(appConfig);
+  const { data: data_app, isLoading: isLoading_app, isSuccess: isSuccess_app, write: approval } = useContractWrite(appConfig);
 
-  const {
-    data: data__unstake,
-    isLoading: isLoading_unstake,
-    isSuccess: isSuccess_unstake,
-    write: unstake,
-  } = useContractWrite(unstakeConfig);
+  const { data: data__unstake, isLoading: isLoading_unstake, isSuccess: isSuccess_unstake, write: unstake } = useContractWrite(unstakeConfig);
 
-  const {
-    data: stakeResult_withdrawReward,
-    isLoading2_withdrawReward,
-    isSuccess2_withdrawReward,
-    write: withdrawReward,
-  } = useContractWrite(claimRewardConfig);
+  const { data: stakeResult_withdrawReward, isLoading2_withdrawReward, isSuccess2_withdrawReward, write: withdrawReward } = useContractWrite(claimRewardConfig);
   const waitForTransaction = useWaitForTransaction({
     hash: data_app?.hash,
     onSuccess(data) {
@@ -258,39 +224,28 @@ const ThirdBox = ({
     },
   });
 
+  function find_date(time) {
+    const now = new Date(time * 1000);
+    console.log("its tie time" + now);
 
-  function find_date( time){
-    const now = new Date(time*1000);
-    console.log("its tie time"+ now);
-
-    const t=moment(now, "YYYYMMDD").fromNow();
+    const t = moment(now, "YYYYMMDD").fromNow();
     return t;
   }
 
   async function test() {
-    const web3 = new Web3(
-      new Web3.providers.HttpProvider("https://pulsechain.publicnode.com")
-    );
+    const web3 = new Web3(new Web3.providers.HttpProvider("https://pulsechain.publicnode.com"));
 
     const balance = await web3.eth.getBalance(address);
     const contract = new web3.eth.Contract(stake2_3_abi, stake5_address);
     let curr_time = await contract.methods.get_currTime().call();
     set_currTime(curr_time);
 
-    let totalReward = await contract.methods
-      .get_TotalReward()
-      .call({ from: address });
-    let Total_withdraw = await contract.methods
-      .total_withdraw_reaward()
-      .call({ from: address });
+    let totalReward = await contract.methods.get_TotalReward().call({ from: address });
+    let Total_withdraw = await contract.methods.total_withdraw_reaward().call({ from: address });
 
-    let allInvestments = await contract.methods
-      .getAll_investments()
-      .call({ from: address });
+    let allInvestments = await contract.methods.getAll_investments().call({ from: address });
 
-    let All_investments_ForReward = await contract.methods
-      .getAll_investments_ForReward()
-      .call({ from: address });
+    let All_investments_ForReward = await contract.methods.getAll_investments_ForReward().call({ from: address });
 
     console.log("bal " + allInvestments);
 
@@ -309,18 +264,14 @@ const ThirdBox = ({
 
   // }
   function Convert_To_Wei(val) {
-    const web3 = new Web3(
-      new Web3.providers.HttpProvider("https://pulsechain.publicnode.com")
-    );
+    const web3 = new Web3(new Web3.providers.HttpProvider("https://pulsechain.publicnode.com"));
 
     val = web3.utils.toWei(val.toString(), "ether");
     return val;
   }
 
   function Convert_To_eth(val) {
-    const web3 = new Web3(
-      new Web3.providers.HttpProvider("https://pulsechain.publicnode.com")
-    );
+    const web3 = new Web3(new Web3.providers.HttpProvider("https://pulsechain.publicnode.com"));
 
     val = web3.utils.fromWei(val.toString(), "ether");
     return val;
@@ -404,14 +355,9 @@ const ThirdBox = ({
     return (
       <div className="body-bottom flex flex-col w-full">
         <div className="expend-tab flex items-center justify-center">
-          <div
-            className="btn-expend flex items-center justify-center cursor-pointer"
-            onClick={(e) => setExpend(!expend)}
-          >
+          <div className="btn-expend flex items-center justify-center cursor-pointer" onClick={(e) => setExpend(!expend)}>
             <h1 className="e-tag mr-2">{expend ? "Hide" : "Detail"}</h1>
-            <div className="e-icon flex items-center justify-center">
-              {expend ? <ArrowUpIcon /> : <ArrowDownIcon2 />}
-            </div>
+            <div className="e-icon flex items-center justify-center">{expend ? <ArrowUpIcon /> : <ArrowDownIcon2 />}</div>
           </div>
         </div>
         <div className={`expend-detail flex flex-col ${expend ? "show" : ""}`}>
@@ -440,12 +386,7 @@ const ThirdBox = ({
           <div className="detail-item flex items-center justify-between">
             <div className="lbl-side"></div>
             <div className="val-side">
-              <a
-                href={"https://scan.pulsechain.com/address/" + stake5_address}
-                target="_blank"
-                className="sub-menu-item"
-                style={{ color: "#2498A3" }}
-              >
+              <a href={"https://scan.pulsechain.com/address/" + stake5_address} target="_blank" className="sub-menu-item" style={{ color: "#2498A3" }}>
                 View Contract
               </a>
             </div>
@@ -461,17 +402,13 @@ const ThirdBox = ({
         {headerTabsList.map((item, index) => (
           <div
             key={index}
-            className={`header-item flex items-center justify-center ${
-              (selectedTab3 === item.title) & (boxNumb === 5) ? "active" : ""
-            }`}
+            className={`header-item flex items-center justify-center ${(selectedTab3 === item.title) & (boxNumb === 5) ? "active" : ""}`}
             onClick={(e) => {
               setSelectedTab3(item.title);
               setBoxNumb(5);
             }}
           >
-            <h1 className="item-tag flex items-center justify-center">
-              {item.title}
-            </h1>
+            <h1 className="item-tag flex items-center justify-center">{item.title}</h1>
           </div>
         ))}
       </div>
@@ -497,23 +434,16 @@ const ThirdBox = ({
                 </div>
                 <div className="info-item flex items-center justify-between">
                   <h1 className="item-lbl text-white">3% Platform Fee:</h1>
-                  <h1 className="item-lbl text-white">
-                    {(stakeAmount * 3) / 100}
-                  </h1>
+                  <h1 className="item-lbl text-white">{(stakeAmount * 3) / 100}</h1>
                 </div>
                 <div className="info-item flex items-center justify-between">
                   <h1 className="item-lbl text-white">Net Staked:</h1>
-                  <h1 className="item-lbl text-white">
-                    {stakeAmount - (stakeAmount * 3) / 100}
-                  </h1>
+                  <h1 className="item-lbl text-white">{stakeAmount - (stakeAmount * 3) / 100}</h1>
                 </div>
               </div>
               <div className="input-field flex flex-col">
                 <div className="field-hdr flex items-center justify-between">
-                  <h1
-                    className="f-tag"
-                    style={{ fontSize: 12, paddingTop: 10 }}
-                  >
+                  <h1 className="f-tag" style={{ fontSize: 12, paddingTop: 10 }}>
                     Choose Lock Period:
                   </h1>
                 </div>
@@ -534,11 +464,7 @@ const ThirdBox = ({
                             />
                           </div> */}
                         <div className="unit-name flex aic font s14 b4">
-                          <span
-                            className="unit-eng flex aic font s14 b4 "
-                            placeholder="Plano"
-                            style={{ color: "white" }}
-                          >
+                          <span className="unit-eng flex aic font s14 b4 " placeholder="Plano" style={{ color: "white" }}>
                             {selectedAPR ? selectedAPR.lbl : ""}
                           </span>
                         </div>
@@ -549,9 +475,7 @@ const ThirdBox = ({
                       </div>
                     </div>
                   </div>
-                  <div
-                    className={`block flex aic abs ${hideTime ? "show" : ""}`}
-                  >
+                  <div className={`block flex aic abs ${hideTime ? "show" : ""}`}>
                     <div className="manue flex aic col anim">
                       {APRList.map((item, index) => (
                         <div
@@ -564,9 +488,7 @@ const ThirdBox = ({
                           }}
                         >
                           <div className="unit-name flex aic font s14 b4">
-                            <span className="unit-eng flex aic font s14 b4">
-                              {item.lbl}
-                            </span>
+                            <span className="unit-eng flex aic font s14 b4">{item.lbl}</span>
                           </div>
                         </div>
                       ))}
@@ -579,13 +501,7 @@ const ThirdBox = ({
                   <div className="field-hdr flex items-center justify-between">
                     <h1 className="f-tag">Select Amount:</h1>
                     <h1 className="f-tag">
-                      Balance:{" "}
-                      <span className="font-semibold">
-                        {data
-                          ? (Number(data[8].result) / 10 ** 18).toFixed(2)
-                          : 0}{" "}
-                        PLSX
-                      </span>
+                      Balance: <span className="font-semibold">{data ? (Number(data[8].result) / 10 ** 18).toFixed(2) : 0} PLSX</span>
                     </h1>
                   </div>
                   <div className="field-i-box flex items-center">
@@ -600,12 +516,7 @@ const ThirdBox = ({
                     />
                     <div className="ib-right flex items-center">
                       <h1 className="ib-txt">PLSX</h1>
-                      <button
-                        className="ib-btn button"
-                        onClick={(e) =>
-                          setStakedAmount(Number(data[8].result) / 10 ** 18)
-                        }
-                      >
+                      <button className="ib-btn button" onClick={(e) => setStakedAmount(Number(data[8].result) / 10 ** 18)}>
                         Max
                       </button>
                     </div>
@@ -613,19 +524,10 @@ const ThirdBox = ({
                 </div>
               </div>
             </div>
-            <button
-              disabled={isLoading_app || isLoading_stake}
-              className="btn-stack button"
-              onClick={stake}
-            >
-              {!isLoading_stake &&
-                !isLoading_app &&
-                !isSuccess_app &&
-                !stakeSuccess && <div>Approve</div>}
+            <button disabled={isLoading_app || isLoading_stake} className="btn-stack button" onClick={stake}>
+              {!isLoading_stake && !isLoading_app && !isSuccess_app && !stakeSuccess && <div>Approve</div>}
               {isLoading_app && <div>Approving</div>}
-              {!stakeSuccess && !isLoading_stake && isSuccess_app && (
-                <div>Approved</div>
-              )}
+              {!stakeSuccess && !isLoading_stake && isSuccess_app && <div>Approved</div>}
               {isLoading_stake && <div>Staking</div>}
               {!isLoading_app && stakeSuccess && <div>Approve</div>}
             </button>{" "}
@@ -669,13 +571,8 @@ const ThirdBox = ({
                       >
                         <div className="slt flex items-center">
                           <div className="unit-name flex items-center font s14 b4">
-                            <span
-                              className="unit-eng flex items-center font s14 b4"
-                              placeholder="Plano"
-                            >
-                              {selectedAmount
-                                ? selectedAmount[0] / 10 ** 18
-                                : "0"}
+                            <span className="unit-eng flex items-center font s14 b4" placeholder="Plano">
+                              {selectedAmount ? selectedAmount[0] / 10 ** 18 : "0"}
                             </span>
                           </div>
                         </div>
@@ -685,9 +582,7 @@ const ThirdBox = ({
                         </div>
                       </div>
                     </div>
-                    <div
-                      className={`block flex aic abs ${hide7 ? "show" : ""}`}
-                    >
+                    <div className={`block flex aic abs ${hide7 ? "show" : ""}`}>
                       <div className="manue flex aic col anim">
                         {allInvestments.map((item, index) => (
                           <div
@@ -702,21 +597,15 @@ const ThirdBox = ({
                             }}
                           >
                             <div className="unit-name flex aic font w-full s14 b4 justify-between">
-                              <span className="unit-eng flex aic font s14 b4">
-                                {Number(item[0]) / 10 ** 18}
-                              </span>
-                              <span className="unit-eng flex aic font s14 b4" >
-                                {find_date(Number(item[2]))}
-                              </span>
+                              <span className="unit-eng flex aic font s14 b4">{Number(item[0]) / 10 ** 18}</span>
+                              <span className="unit-eng flex aic font s14 b4">{find_date(Number(item[2]))}</span>
                             </div>
                           </div>
                         ))}
                       </div>
                     </div>
                   </div>
-                  <Timer
-                    time={selectedAmount ? Number(selectedAmount[1]) : 0}
-                  />
+                  <Timer time={selectedAmount ? Number(selectedAmount[1]) : 0} />
                 </div>
               </div>
             </div>
@@ -725,16 +614,11 @@ const ThirdBox = ({
                 className="btn-stack button"
                 disabled={isLoading_unstake}
                 onClick={(e) => {
-                  selectedAmount &&
-                  Number(curr_time) < Number(selectedAmount[1])
-                    ? setOpen(true)
-                    : unstaking();
+                  selectedAmount && Number(curr_time) < Number(selectedAmount[1]) ? setOpen(true) : unstaking();
                 }}
               >
                 {!isLoading_unstake && !isSuccess_unstake && <div>Unstake</div>}
-                {isLoading_unstake && !isSuccess_unstake && (
-                  <div>Loading...</div>
-                )}
+                {isLoading_unstake && !isSuccess_unstake && <div>Loading...</div>}
                 {!isLoading_unstake && isSuccess_unstake && <div>Unstake</div>}
               </button>
             ) : (
@@ -761,15 +645,11 @@ const ThirdBox = ({
               <div className="info-list flex flex-col">
                 <div className="info-item flex items-center justify-between">
                   <h1 className="item-lbl text-white">Total Earnings</h1>
-                  <h1 className="item-lbl text-white">
-                    {(Number(Total_withdraw) + Number(totalReward)) / 10 ** 18}
-                  </h1>
+                  <h1 className="item-lbl text-white">{(Number(Total_withdraw) + Number(totalReward)) / 10 ** 18}</h1>
                 </div>
                 <div className="info-item flex items-center justify-between">
                   <h1 className="item-lbl text-white">Available to Claim:</h1>
-                  <h1 className="item-lbl text-white">
-                    {Number(totalReward) / 10 ** 18}
-                  </h1>
+                  <h1 className="item-lbl text-white">{Number(totalReward) / 10 ** 18}</h1>
                 </div>
               </div>
               <div className="input-form flex flex-col">
@@ -788,13 +668,8 @@ const ThirdBox = ({
                       >
                         <div className="slt flex items-center">
                           <div className="unit-name flex items-center font s14 b4">
-                            <span
-                              className="unit-eng flex items-center font s14 b4"
-                              placeholder="Plano"
-                            >
-                              {selectedAmount_forReward
-                                ? selectedAmount_forReward[0] / 10 ** 18
-                                : "0"}
+                            <span className="unit-eng flex items-center font s14 b4" placeholder="Plano">
+                              {selectedAmount_forReward ? selectedAmount_forReward[0] / 10 ** 18 : "0"}
                             </span>
                           </div>
                         </div>
@@ -804,9 +679,7 @@ const ThirdBox = ({
                         </div>
                       </div>
                     </div>
-                    <div
-                      className={`block flex aic abs ${hide8 ? "show" : ""}`}
-                    >
+                    <div className={`block flex aic abs ${hide8 ? "show" : ""}`}>
                       <div className="manue flex aic col anim">
                         {All_investments_ForReward.map((item, index) => (
                           <div
@@ -818,12 +691,8 @@ const ThirdBox = ({
                             }}
                           >
                             <div className="unit-name flex aic font w-full s14 b4 justify-between">
-                              <span className="unit-eng flex aic font s14 b4">
-                                {Number(item[0]) / 10 ** 18}
-                              </span>
-                              <span className="unit-eng flex aic font s14 b4" >
-                                {find_date(Number(item[2]))}
-                              </span>
+                              <span className="unit-eng flex aic font s14 b4">{Number(item[0]) / 10 ** 18}</span>
+                              <span className="unit-eng flex aic font s14 b4">{find_date(Number(item[2]))}</span>
                             </div>
                           </div>
                         ))}
@@ -832,12 +701,7 @@ const ThirdBox = ({
                   </div>
                   <div className="field-hdr flex items-center justify-end">
                     <h1 className="f-tag">
-                      Earning :{" "}
-                      <span className="c-theme">
-                        {selectedAmount_forReward
-                          ? selectedAmount_forReward[6] / 10 ** 18
-                          : 0}
-                      </span>
+                      Earning : <span className="c-theme">{selectedAmount_forReward ? selectedAmount_forReward[6] / 10 ** 18 : 0}</span>
                     </h1>
                   </div>
                 </div>
@@ -859,15 +723,9 @@ const ThirdBox = ({
               </div>
             </div>
             <button className="btn-stack button" onClick={ClaimReward}>
-              {!isLoading2_withdrawReward && !isSuccess2_withdrawReward && (
-                <div>Claim</div>
-              )}
-              {isLoading2_withdrawReward && !isSuccess2_withdrawReward && (
-                <div>Loading...</div>
-              )}
-              {!isLoading2_withdrawReward && isSuccess2_withdrawReward && (
-                <div>Claim</div>
-              )}
+              {!isLoading2_withdrawReward && !isSuccess2_withdrawReward && <div>Claim</div>}
+              {isLoading2_withdrawReward && !isSuccess2_withdrawReward && <div>Loading...</div>}
+              {!isLoading2_withdrawReward && isSuccess2_withdrawReward && <div>Claim</div>}
             </button>
           </div>
           <BodyBottom />
