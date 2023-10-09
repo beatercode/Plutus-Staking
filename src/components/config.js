@@ -5,7 +5,11 @@ export const stake4_address = "0x3b6eb879BBF2d90AecBb3A34C3a654f6e5Cb6C2f"; //WB
 export const stake5_address = "0x3b6eb879BBF2d90AecBb3A34C3a654f6e5Cb6C2f"; //PLSX
 export const stake6_address = "0x3b6eb879BBF2d90AecBb3A34C3a654f6e5Cb6C2f"; //PLUTUS
 
-export const Stake1_token_Address = "0x3501e336C5C07BfD214e69A700f2505D02D0e8F4";
+export const Stake1_1_token_Address = "0x3501e336C5C07BfD214e69A700f2505D02D0e8F4";
+export const Stake1_2_token_Address = "0x60C239186FB5A245bb12849Cc6E7AD265675da9B";
+// export const Stake1_3_token_Address = "0x3501e336C5C07BfD214e69A700f2505D02D0e8F4";
+// export const Stake1_4_token_Address = "0x3501e336C5C07BfD214e69A700f2505D02D0e8F4";
+
 export const Stake2_token_Address = "0x3501e336C5C07BfD214e69A700f2505D02D0e8F4";
 export const Stake3_token_Address = "0x3501e336C5C07BfD214e69A700f2505D02D0e8F4";
 export const Stake4_token_Address = "0x3501e336C5C07BfD214e69A700f2505D02D0e8F4";

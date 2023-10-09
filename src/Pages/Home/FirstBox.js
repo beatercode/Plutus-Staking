@@ -4,7 +4,7 @@ import { ArrowDownIcon, QuestionIcon, ArrowDownIcon2, ArrowUpIcon } from "../../
 import moment from "moment";
 import Modal from "../../components/Modal";
 import ConnectWallet from "../../components/ConnectWallet";
-import { stake1_address, stake1_abi, token_abi, Stake1_token_Address } from "../../components/config";
+import { stake1_address, stake1_abi, token_abi, Stake1_1_token_Address, Stake1_2_token_Address } from "../../components/config";
 import { useContractReads, useContractRead, useContractWrite, usePrepareContractWrite, useWaitForTransaction, usePublicClient } from "wagmi";
 import ConfirmationPopup from "../../components/confirmationPopup";
 import { useNetwork, useSwitchNetwork } from "wagmi";
@@ -19,10 +19,16 @@ const poolContract = {
   abi: stake1_abi,
 };
 
-const stakeToken1Contract = {
-  address: Stake1_token_Address,
-  abi: token_abi,
-};
+const knownAllowedTokens = [
+  {
+    address: Stake1_1_token_Address,
+    abi: token_abi,
+  },
+  {
+    address: Stake1_2_token_Address,
+    abi: token_abi,
+  },
+];
 
 const FirstBox = ({
   headerTabsList,
@@ -70,6 +76,8 @@ const FirstBox = ({
   const [unstakeDetails, set_unstakeDetails] = useState([]);
   const [RewardDetails, set_RewardDetails] = useState([]);
 
+  const [pairData, setPairData] = useState([]);
+
   const [slected_pair_rew, set_slected_pair_rew] = useState([[]]);
   const [slected_pair, set_slected_pair] = useState([[]]);
 
@@ -100,7 +108,7 @@ const FirstBox = ({
   }, address);
 
   const { config: appConfig } = usePrepareContractWrite({
-    address: Stake1_token_Address,
+    address: token1[1],
     abi: token_abi,
     functionName: "approve",
     args: [stake1_address, stakeAmount * 10 ** 18],
@@ -233,12 +241,6 @@ const FirstBox = ({
         functionName: "get_withdrawnTime",
         args: [1],
       },
-
-      {
-        ...stakeToken1Contract,
-        functionName: "balanceOf",
-        args: [address],
-      },
     ],
   });
 
@@ -310,7 +312,8 @@ const FirstBox = ({
     let curr_time = await contract.methods.get_currTime().call();
     let allowed_tokens = await contract.methods.getAll_allowedTokens().call({ from: address });
     set_allowedTokens(allowed_tokens);
-    console.log("allowed_tokens " + allowed_tokens[1][1]);
+    console.log(allowedTokens);
+    // console.log("allowed_tokens " + allowed_tokens[1][1]);
     for (let i = 0; i < allowed_tokens.length; i++) {
       let temp = await contract.methods.getAll_investments(allowed_tokens[i][1].toString()).call({ from: address });
       let temp_rew = await contract.methods.getAll_investments_ForReward(allowed_tokens[i][1].toString()).call({ from: address });
@@ -319,16 +322,16 @@ const FirstBox = ({
       details.push(temp ? temp : []);
       details_rew.push(temp_rew ? temp_rew : []);
 
-      console.log("token add " + i + " " + allowed_tokens[i][1]);
-      console.log("details  " + i + " " + temp);
+      // console.log("token add " + i + " " + allowed_tokens[i][1]);
+      // console.log("details  " + i + " " + temp);
     }
-    console.log("test unstake prrr " + details);
+    // console.log("test unstake prrr " + details);
 
     set_unstakeDetails(details);
     set_RewardDetails(details_rew);
     set_slected_plp_add(allowed_tokens[0][1]);
 
-    console.log("all alloweed tokens" + allowed_tokens);
+    // console.log("all alloweed tokens" + allowed_tokens);
 
     set_slected_pair(details[0]);
 
@@ -442,11 +445,26 @@ const FirstBox = ({
                   
                   </div>
           </div> */}
-          <div className="detail-item flex items-center justify-between">
+          {allowedTokens.map((item, index) => (
+            <div key={index} className="detail-item flex items-center justify-between">
+              <div className="lbl-side"></div>
+              <div className="val-side">
+                <a
+                  href="https://app.v4.testnet.pulsex.com/add/0x3AeCc030E652961F9895877Bc3245cC6F6a7C975/"
+                  target="_blank"
+                  className="sub-menu-item"
+                  style={{ color: "#2498A3" }}
+                >
+                  Get {item[0]}
+                </a>
+              </div>
+            </div>
+          ))}
+          {/* <div className="detail-item flex items-center justify-between">
             <div className="lbl-side"></div>
             <div className="val-side">
               <a
-                href="https://v2-app.pulsex.com/swap?inputCurrency=0x2260fac5e5542a773aa44fbcfedf7c193bc2c599&outputCurrency=0x33e4d3163e66b46babc0faf8b30c6c36dd4ab9e9"
+                href="https://app.v4.testnet.pulsex.com/add/0x3AeCc030E652961F9895877Bc3245cC6F6a7C975/0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"
                 target="_blank"
                 className="sub-menu-item"
                 style={{ color: "#2498A3" }}
@@ -459,7 +477,7 @@ const FirstBox = ({
             <div className="lbl-side"></div>
             <div className="val-side">
               <a
-                href="https://app.pulsex.com/swap?inputCurrency=0x33e4d3163e66b46babc0faf8b30c6c36dd4ab9e9&outputCurrency=0x6B175474E89094C44Da98b954EedeAC495271d0F"
+                href="https://app.v4.testnet.pulsex.com/add/0x3AeCc030E652961F9895877Bc3245cC6F6a7C975/0x826e4e896CC2f5B371Cd7Bb0bd929DB3e3DB67c0"
                 target="_blank"
                 className="sub-menu-item"
                 style={{ color: "#2498A3" }}
@@ -472,7 +490,7 @@ const FirstBox = ({
             <div className="lbl-side"></div>
             <div className="val-side">
               <a
-                href="https://app.pulsex.com/swap?inputCurrency=0x33e4d3163e66b46babc0faf8b30c6c36dd4ab9e9&outputCurrency=0xdAC17F958D2ee523a2206206994597C13D831ec7"
+                href="https://app.v4.testnet.pulsex.com/add/0x3AeCc030E652961F9895877Bc3245cC6F6a7C975/"
                 target="_blank"
                 className="sub-menu-item"
                 style={{ color: "#2498A3" }}
@@ -485,7 +503,7 @@ const FirstBox = ({
             <div className="lbl-side"></div>
             <div className="val-side">
               <a
-                href=" https://app.pulsex.com/swap?inputCurrency=0x33e4d3163e66b46babc0faf8b30c6c36dd4ab9e9&outputCurrency=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+                href=" https://app.v4.testnet.pulsex.com/add/0x3AeCc030E652961F9895877Bc3245cC6F6a7C975/"
                 target="_blank"
                 className="sub-menu-item"
                 style={{ color: "#2498A3" }}
@@ -493,12 +511,12 @@ const FirstBox = ({
                 Get PLUTUS/USDC
               </a>
             </div>
-          </div>
+          </div> */}
 
           <div className="detail-item flex items-center justify-between">
             <div className="lbl-side"></div>
             <div className="val-side">
-              <a href={"https://scan.pulsechain.com/address/" + stake1_address} target="_blank" className="sub-menu-item" style={{ color: "#2498A3" }}>
+              <a href={"https://scan.v4.testnet.pulsechain.com/address/" + token1[1]} target="_blank" className="sub-menu-item" style={{ color: "#2498A3" }}>
                 View Contract
               </a>
             </div>
@@ -594,7 +612,6 @@ const FirstBox = ({
                             onClick={(e) => {
                               setHide1(!hide1);
                               setToken1(item);
-                              console.log("choosed token " + token1[1]);
                             }}
                           >
                             <div className="unit-name flex aic font s14 b4">
@@ -663,7 +680,10 @@ const FirstBox = ({
                   <div className="field-hdr flex items-center justify-between">
                     <h1 className="f-tag">Select Amount:</h1>
                     <h1 className="f-tag">
-                      Balance: <span className="font-semibold">{data ? (Number(data[8].result) / 10 ** 18).toFixed(2) : 0} PLUTUS</span>
+                      Balance:{" "}
+                      <span className="font-semibold">
+                        {Number(allowedTokens.find((token) => token.plp_add == token1[1])?.my_balance / 10 ** 18).toFixed(6)} PLP
+                      </span>
                     </h1>
                   </div>
                   <div className="field-i-box flex items-center">
@@ -765,8 +785,6 @@ const FirstBox = ({
                               set_slected_pair(unstakeDetails[index]);
                               set_slected_plp_add(item[1]);
                               set_slected_pair_inv(unstakeDetails[index][0]);
-
-                              console.log("unstakeDetails", unstakeDetails);
                             }}
                           >
                             <div className="unit-name flex aic font s14 b4">
