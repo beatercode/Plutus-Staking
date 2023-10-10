@@ -114,44 +114,15 @@ const FirstBox = ({
     args: [stake1_address, stakeAmount * 10 ** 18],
   });
 
-  // const { config: stakeConfig } = usePrepareContractWrite({
-  //   address: stake1_address,
-  //   abi: stake1_abi,
-  //   functionName: 'Stake',
-  //   args: [token1[1],stakeAmount*10**18],
-  //   value: ((stakeAmount*0.3/100) * (10**18)).toString(),
-
-  // })
-
-  const {
-    data: stakeResult,
-    isLoading: isLoading_stake,
-    isSuccess: stakeSuccess,
-    write: staking,
-  } = useContractWrite({
+  const { config: stakeConfig } = usePrepareContractWrite({
     address: stake1_address,
     abi: stake1_abi,
     functionName: "Stake",
-    args: [token1[1], stakeAmount * 10 ** 18, selectedAPR.value],
+    args: [token1[1], (stakeAmount === 0 ? 1 : stakeAmount) * 10 ** 18, selectedAPR.value],
     // value: Convert_To_Wei(((stakeAmount)*0.3/100)),
-    onSuccess(data) {
-      // test();
-      console.log("Success", data);
-    },
   });
 
-  // const { write } = useContractWrite({
-
-  //   address: token1[1],
-  //   abi: token_abi,
-  //   functionName: 'approve',
-  //   args: [stake1_address,stakeAmount*10**18],
-  //   onMutate({ args, overrides }) {
-  //     staking?.()
-  //     console.log('Success', data)
-  //   },
-
-  // })
+  const isApproved = allowedTokens.find((token) => token.plp_add == token1[1])?.approved > stakeAmount * 10 ** 18;
 
   const { config: unstakeConfig } = usePrepareContractWrite({
     address: stake1_address,
@@ -166,43 +137,42 @@ const FirstBox = ({
     functionName: "withdrawReward",
   });
   const { data: data_app, isLoading: isLoading_app, isSuccess: isSuccess_app, write: approval } = useContractWrite(appConfig);
-
-  // const { data:data__stake, isLoading:isLoading_stake, isSuccess:isSuccess_stake, write: staking  } = useContractWrite(stakeConfig)
+  const { data: data_stake, isLoading: isLoading_stake, isSuccess: isSuccess_stake, write: staking } = useContractWrite(stakeConfig);
 
   const { data: data__unstake, isLoading: isLoading_unstake, isSuccess: isSuccess_unstake, write: unstake } = useContractWrite(unstakeConfig);
   const { data: stakeResult_withdrawReward, isLoading2_withdrawReward, isSuccess2_withdrawReward, write: withdrawReward } = useContractWrite(claimRewardConfig);
 
-  const waitForTransaction = useWaitForTransaction({
-    hash: data_app?.hash,
-    onSuccess(data) {
-      staking?.();
-      console.log("Success", data);
-    },
-  });
+  // const waitForTransaction = useWaitForTransaction({
+  //   hash: data_app?.hash,
+  //   onSuccess(data) {
+  //     staking?.();
+  //     console.log("Success", data);
+  //   },
+  // });
 
-  const waitForTransaction2 = useWaitForTransaction({
-    hash: stakeResult?.hash,
-    onSuccess(data) {
-      test?.();
-      console.log("Success2", data);
-    },
-  });
+  // const waitForTransaction2 = useWaitForTransaction({
+  //   hash: stakeResult?.hash,
+  //   onSuccess(data) {
+  //     test?.();
+  //     console.log("Success2", data);
+  //   },
+  // });
 
-  const waitForTransaction3 = useWaitForTransaction({
-    hash: data__unstake?.hash,
-    onSuccess(data) {
-      test?.();
-      console.log("Success2", data);
-    },
-  });
+  // const waitForTransaction3 = useWaitForTransaction({
+  //   hash: data__unstake?.hash,
+  //   onSuccess(data) {
+  //     test?.();
+  //     console.log("Success2", data);
+  //   },
+  // });
 
-  const waitForTransaction4 = useWaitForTransaction({
-    hash: stakeResult_withdrawReward?.hash,
-    onSuccess(data) {
-      test?.();
-      console.log("Success2", data);
-    },
-  });
+  // const waitForTransaction4 = useWaitForTransaction({
+  //   hash: stakeResult_withdrawReward?.hash,
+  //   onSuccess(data) {
+  //     test?.();
+  //     console.log("Success2", data);
+  //   },
+  // });
 
   const { data, isError1, isLoading1 } = useContractReads({
     contracts: [
@@ -251,6 +221,7 @@ const FirstBox = ({
       approval?.();
     },
   });
+
   const { switchNetwork: unstake_switch } = useSwitchNetwork({
     chainId: networkId,
     // throwForSwitchChainNotSupported: true,
@@ -258,6 +229,7 @@ const FirstBox = ({
       unstake?.();
     },
   });
+
   const {
     chains,
     error,
@@ -312,20 +284,29 @@ const FirstBox = ({
     let curr_time = await contract.methods.get_currTime().call();
     let allowed_tokens = await contract.methods.getAll_allowedTokens().call({ from: address });
     set_allowedTokens(allowed_tokens);
-    console.log(allowedTokens);
+    // console.log(allowedTokens);
     // console.log("allowed_tokens " + allowed_tokens[1][1]);
+
+    let lpApprovedArray = [];
+
     for (let i = 0; i < allowed_tokens.length; i++) {
       let temp = await contract.methods.getAll_investments(allowed_tokens[i][1].toString()).call({ from: address });
       let temp_rew = await contract.methods.getAll_investments_ForReward(allowed_tokens[i][1].toString()).call({ from: address });
 
+      const lpContract = new web3.eth.Contract(token_abi, allowed_tokens[i][1].toString());
+      let lpApproved = await lpContract.methods.allowance(address, stake1_address).call({ from: address });
+
+      lpApprovedArray.push(lpApproved);
+
       // unstakeDetails.push(temp);
       details.push(temp ? temp : []);
       details_rew.push(temp_rew ? temp_rew : []);
-
-      // console.log("token add " + i + " " + allowed_tokens[i][1]);
-      // console.log("details  " + i + " " + temp);
     }
-    // console.log("test unstake prrr " + details);
+
+    const mergedAllowedTokenInfo = allowed_tokens.map((obj, index) => {
+      return { ...obj, approved: lpApprovedArray[index] };
+    });
+    set_allowedTokens(mergedAllowedTokenInfo);
 
     set_unstakeDetails(details);
     set_RewardDetails(details_rew);
@@ -361,9 +342,9 @@ const FirstBox = ({
   }
 
   function stake() {
-    console.log("choosed Token " + token1[1]);
+    // console.log("choosed Token " + token1[1]);
+    // console.log("object stake val " + selectedAPR.value);
 
-    console.log("object stake val " + selectedAPR.value);
     if (isDisconnected) {
       alert("kindly connect your wallet ");
       return;
@@ -375,17 +356,21 @@ const FirstBox = ({
     let fee = (stakeAmount * 0.3) / 100;
     fee = fee * 10 ** 18;
 
+    console.log("token1", token1);
+
     if (Number(token1[2]) < Number(fee)) {
       alert("You dont have enough balance");
       return;
     }
+
     if (chain.id != networkId) {
-      console.log("object chain");
       stake_switch?.();
     } else {
-      console.log("object chain111");
-
-      approval?.();
+      if (isApproved) {
+        staking?.();
+      } else {
+        approval?.();
+      }
     }
   }
 
@@ -460,6 +445,7 @@ const FirstBox = ({
               </div>
             </div>
           ))}
+
           {/* <div className="detail-item flex items-center justify-between">
             <div className="lbl-side"></div>
             <div className="val-side">
@@ -708,11 +694,12 @@ const FirstBox = ({
             </div>
             {
               <button disabled={isLoading_app || isLoading_stake} className="btn-stack button" onClick={stake}>
-                {!isLoading_stake && !isLoading_app && !isSuccess_app && !stakeSuccess && <div>Approve</div>}
+                {!isLoading_stake && !isLoading_app && !isSuccess_app && !isSuccess_stake && !isApproved && <div>Approve</div>}
                 {isLoading_app && <div>Approving</div>}
-                {!stakeSuccess && !isLoading_stake && isSuccess_app && <div>Approved</div>}
+                {!isSuccess_stake && !isLoading_stake && isSuccess_app && <div>Approved</div>}
+                {isApproved && <div>Stake</div>}
                 {isLoading_stake && <div>Staking</div>}
-                {!isLoading_app && stakeSuccess && <div>Approve</div>}
+                {!isLoading_app && isSuccess_stake && <div>Approve</div>}
               </button>
             }
           </div>
